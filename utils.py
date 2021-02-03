@@ -1,0 +1,109 @@
+###############################################################################
+#
+# Software program written by Neil Murphy in year 2020.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+# By using this software, the Disclaimer and Terms distributed with the
+# software are deemed accepted, without limitation, by user.
+#
+# You should have received a copy of the Disclaimer and Terms document
+# along with this program.  If not, see... https://bit.ly/2Tlr9ii
+#
+###############################################################################
+
+from datetime import datetime
+import itertools
+import math
+import os
+
+from sqlalchemy import create_engine
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+def time_str_to_datetime(time):
+    return datetime.strptime(time, "%H:%M").time()
+
+
+def round_down(x):
+    return math.trunc(x * 4) / 4
+
+
+def round_up(x):
+    return math.ceil(x * 4) / 4
+
+
+def time_tuple(d):
+    keys, values = zip(*d.items())
+    return [tuple(dict(zip(keys, v)).items()) for v in itertools.product(*values)]
+
+
+def create_db_connection():
+    """
+    Opens a database connection.
+
+    This function requires that environment variables be set for the vars:
+        backtrader_db_type
+        backtrader_db_host
+        backtrader_db_user
+        backtrader_db_password
+
+    The easiest way to set these variables is just to add a .env file to
+    the main directory.
+    """
+    db_name = os.getenv("db_name")
+    db_type = os.getenv("db_type")
+    host = os.getenv("db_host")
+    user = os.getenv("db_user")
+    password = os.getenv("db_password")
+
+    connection_string = f"{db_type}://{user}:{password}@{host}/{db_name}"
+    return create_engine(connection_string, echo=False)
+
+
+def yes_or_no(question):
+    """ Simple yes no choice function. """
+    reply = str(input(f"{question} (y/n): ")).lower().strip()
+    if reply[0] == "y":
+        return True
+    if reply[0] == "n":
+        return False
+    else:
+        return yes_or_no("Please enter y/n")
+
+
+def clear_database():
+    engine = create_db_connection()
+
+    sql_list = [
+        "DROP SCHEMA public CASCADE;",
+        "CREATE SCHEMA public;",
+        "GRANT ALL ON SCHEMA public TO postgres;",
+        "GRANT ALL ON SCHEMA public TO public;",
+        "GRANT ALL ON SCHEMA public TO admin;",
+        "COMMENT ON SCHEMA public IS 'standard public schema';",
+    ]
+    for sql in sql_list:
+        engine.execute(sql)
+
+    # cursor.close()
+    engine.dispose()
+    print("Database was reset.")
+
+
+def df_to_db(agg_dict):
+    """ Saves results dataframes to the postgres database """
+    engine = create_db_connection()
+
+    for table_name, df in agg_dict.items():
+        df.to_sql(
+            table_name, con=engine, if_exists="append", index=False, method="multi"
+        )
+
+    engine.dispose()
+
