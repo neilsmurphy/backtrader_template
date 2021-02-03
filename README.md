@@ -1,4 +1,4 @@
-Chewbacca, 
+### Chewbacca, 
 
 I've added this to a private github and cleaned up my documentation. Please keep 
 this private for now. I would appreciate any feedback. 
@@ -21,8 +21,8 @@ instrument=["F", "TSLA", "AAPL", "FB", "V", "BAC"],
 sma_fast=list(range(15, 61, 15)),
 ```
 If you want to try different dates, it's a bit tricky. You can use a start date and 
-change the duration using a list. If you want multiple start and end states, then 
-this needs to be handled outside the params dictionary. Let me know if you need this 
+change the duration using a list. If you want multiple start and end dates, then 
+this needs to be handled outside the params dictionary. Let me know if you need this. 
 I have some sample code. 
 
 The system will automatically calculate all of the possible combinations. The output 
@@ -32,8 +32,8 @@ run, just give you the parameters and number of test that will execute.
 
 To run multi processor, use: `multi_pro = True`
 
-If you are setting up list that will have overlap in your back testing, you can set 
-some criteria to eliminate those ones. For example suppose you have two sma's as 
+If you are setting up lists that will have overlap in your back testing, you can set 
+some criteria to eliminate overlapping tests. For example suppose you have two sma's as 
 follows 
 
 ```
@@ -42,7 +42,8 @@ sma_slow=list(range(30, 91, 15)),
 ```
 
 Clearly there is some overlap where the fast is slower than the slow. In the 
-RunBacktest class in the `scenario` method line 454 you can add in the following: 
+RunBacktest class in the `scenario` method line 454 you can add in the following to 
+skip these backtests: 
 
 ```
 if scenario["sma_fast"] >= scenario["sma_slow"]:
@@ -73,13 +74,26 @@ are included in full or not full in the extension/analyzer module at the bottom.
 
 On the topic of extensions I try to split out all of my specific task classes in 
 separate modules in the extension directory and then import to main as needed. I find 
-this keeps things tidy. Also I would normally put in sizer and any other modules in  
-extension. You will notice as well I have a strategy class in extension. I use this  
-for standard strawtegy stuff and then use this as a base class in the main Strategy  
-class in the main module. 
+this keeps things tidy. Also I would normally put in sizer and any other modules in 
+extension. 
 
-Database information is in the .env file. I'm using postgres. You can have a 
-backtest export to excel using 'save_excel=True'
+You will notice as well I have a strategy class in extension. I use this for 
+standard strategy stuff and then use this as a base class in the main Strategy class 
+in the main module. 
 
-Hope this helps. Again pleae keep private for now. I will likely publish all of this 
-in the next month or so, just too busy right now. 
+Database information is in the .env file. I'm using postgres via SQLAlchemy. You can 
+adjust the database settings in the utils.py file. 
+
+You can have a backtest export to excel using 'save_excel=True' Set the directory 
+and filename using: 
+
+```
+save_path="your_save_path",
+save_name="your_file_name",
+```
+
+Hope this helps. Again please keep private for now. I will likely publish all of this 
+in the next month or so, just too busy right now.
+
+Cheers, 
+Neil
