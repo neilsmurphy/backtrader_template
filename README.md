@@ -16,9 +16,10 @@ For instructions on parameters see the docstring in the class RunBacktest in mai
 To run multiple backtest simply use an iterable. 
 
 Examples:
+```
 instrument=["F", "TSLA", "AAPL", "FB", "V", "BAC"],
 sma_fast=list(range(15, 61, 15)),
-
+```
 If you want to try different dates, it's a bit tricky. You can use a start date and 
 change the duration using a list. If you want multiple start and end states, then 
 this needs to be handled outside the params dictionary. Let me know if you need this 
