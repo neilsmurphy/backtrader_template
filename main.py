@@ -32,6 +32,7 @@ import extension.indicator as id
 from extension.indicator import SmaCross
 from extension.analyzer import AddAnalyzer
 from extension.result import result
+from extension.sizer import Stake
 from extension.strategy import StandardStrategy
 from utils import clear_database, df_to_db, yes_or_no
 
@@ -216,7 +217,7 @@ class RunBacktest:
             trade_start=[None, True],
             to_date=["2020-12-31", True],
             duration=[None, False],
-            instrument=[None, True],
+            instrument=["^GSPC", True],
             benchmark=[None, True],
             initinvestment=[10000, False],
             commission=[0.0, True],
@@ -341,7 +342,7 @@ class RunBacktest:
 
             else:
                 # Single call to run backtest sequentially, no multi-processing.
-                self.backtest_controller(scenarios)
+                return self.backtest_controller(scenarios)
 
             end_time = time.time()
             print(f"\nElapsed time of {(end_time - start_time):.2f}")
@@ -356,7 +357,8 @@ class RunBacktest:
         # Loop though each backtest parameters.
         loop = 1
         for scene in scenarios:
-            print("Starting loop {}".format(loop))
+            if scene['printon']:
+                print("Starting loop {}".format(loop))
             loop += 1
             scene["test_number"] = str(uuid.uuid4()).replace("-", "")[:10]
 
@@ -372,9 +374,10 @@ class RunBacktest:
                     if scene["save_db"]:
                         df_to_db(agg_dict)
 
-            print(f"Final value {final_value:.2f}")
+            if scene["printon"]:
+                print(f"Final value {final_value:.2f}")
 
-        return None
+        return final_value
 
     def backtest_controller_multi(self, scene=None):
         """
@@ -455,8 +458,8 @@ class RunBacktest:
                 continue
 
             scenario_dict_final.append(scenario)
-
-        print("There will be {} backtests run.\n".format(len(scenario_dict_final)))
+        if scenario['printon']:
+            print("There will be {} backtests run.\n".format(len(scenario_dict_final)))
 
         return scenario_dict_final, test_params
 
@@ -500,8 +503,9 @@ class RunBacktest:
         # Broker
         cerebro.broker = bt.brokers.BackBroker()
 
+
         # Sizer
-        # cerebro.addsizer(SetTradeSize)
+        cerebro.addsizer(Stake)
 
         # Cash
         cerebro.broker.setcash(scene["initinvestment"])
@@ -558,7 +562,7 @@ class Strategy(StandardStrategy):
         super().__init__()
         self.ord = None
 
-        print(f"This is the temp name parameter: {self.p.username}")
+        # print(f"This is the temp name parameter: {self.p.username}")
 
         """ Average True Range"""
         self.sma_cross = SmaCross(sma_fast=self.p.sma_fast, sma_slow=self.p.sma_slow)
@@ -596,7 +600,7 @@ class Strategy(StandardStrategy):
 
             limit_price = self.datas[0].close[0] * (1 + self.p.limit_price)
             stop_price = self.datas[0].close[0] * (1 - self.p.stop_price)
-            size = self.p.trade_size
+            size = (self.broker.get_value() * .9) / self.datas[0].close[0]
 
             order = self.buy_bracket(
                 size=size,

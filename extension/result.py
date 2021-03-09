@@ -844,7 +844,7 @@ def result(results, scene, test_number):
 
         _, agg_dict = dimension(scene, results, test_number, agg_dict=agg_dict)
 
-        agg_dict = quantstats(scene, test_number, agg_dict=agg_dict)
+        # agg_dict = quantstats(scene, test_number, agg_dict=agg_dict)
 
     elif scene["save_excel"]:
 

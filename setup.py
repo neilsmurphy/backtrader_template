@@ -22,35 +22,36 @@ from main import RunBacktest
 # GENERAL SETTINGS
 print_params = True
 run_test_now = True
-multi_pro = True
-reset_database = True
+multi_pro = False
+reset_database = False
 
 # BACKTEST PARAMETERS
 pvalues = dict(
-    username='Chewbacca',
-    batchname="Multi Test",
+    username='runout',
+    batchname="Single Test",
     from_date="2016-01-01",
     trade_start="2016-09-01",
-    to_date="2019-12-31",
+    to_date="2020-12-31",
     # duration=500,
-    instrument=["F", "TSLA", "AAPL", "FB", "V", "BAC"],
+    instrument="FB", # ["F", "TSLA", "AAPL", "FB", "V", "BAC"],
     benchmark="SPY",
-    sma_fast=15, #list(range(15, 61, 15)),
-    sma_slow=45, # list(range(30, 91, 15)),
+    sma_fast=15, #list(range(15, 61, 30)),
+    sma_slow=30, #list(range(30, 91, 30)),
     limit_price=.05, #[.025, .05, .075],
     stop_price=.05, # [.03, .05, .07, .09],
     trade_size=10,
+    initinvestment=10000,
     # TERMINAL OUTPUT
     print_dev=False,
-    print_orders_trades=False,
+    print_orders_trades=True,
     print_ohlcv=-1,  # `-1` for no print, otherwise feed the dataline number.
     print_final_output=False,
-    printon=True,
+    printon=False,
     # SAVING
-    save_result=True,
-    save_excel=True,
+    save_result=False,
+    save_excel=False,
     save_db=True,
-    full_export=False,
+    full_export=True,
 )
 
 

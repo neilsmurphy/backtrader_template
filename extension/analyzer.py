@@ -313,6 +313,13 @@ class AddAnalyzer:
         # Analyzers. Custom analyzers can be found in extensions/analyzer.py
         # Analyzers returned in the strategy object
         scene = self.cerebro.strats[0][0][2]
+        # self.cerebro.addanalyzer(
+        #     bt.analyzers.VariabilityWeightedReturn,
+        #     _name="VWR",
+        #     timeframe=bt.TimeFrame.Days,
+        #     tau=2.0,
+        #     sdev_max=0.2,
+        # )
 
         # For all tests, but mainly high volume multi-processor tests.
         self.cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name="trades")
