@@ -23,7 +23,7 @@ from main import RunBacktest
 print_params = True
 run_test_now = True
 multi_pro = False
-reset_database = False
+reset_database = True
 
 # BACKTEST PARAMETERS
 pvalues = dict(
@@ -40,7 +40,7 @@ pvalues = dict(
     limit_price=.05, #[.025, .05, .075],
     stop_price=.05, # [.03, .05, .07, .09],
     trade_size=10,
-    initinvestment=10000,
+    initinvestment=1000000,
     # TERMINAL OUTPUT
     print_dev=False,
     print_orders_trades=True,
@@ -48,7 +48,7 @@ pvalues = dict(
     print_final_output=False,
     printon=False,
     # SAVING
-    save_result=False,
+    save_result=True,
     save_excel=False,
     save_db=True,
     full_export=True,
