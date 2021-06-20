@@ -255,3 +255,13 @@ needed. Modules that are stored here are:
 - result: For generating spreadsheets and database outputs. 
 - sizer: Can be used for sizing trades. (Not used in default settings.)
 - strategy: Superclass for strategy with standard methods.
+
+
+## Dependencies
+Packages required: 
+
+[Quandl](https://github.com/quandl/quandl-python)  
+[Pandas](https://github.com/pandas-dev/pandas)
+
+## License
+[MIT](https://github.com/neilsmurphy/sharadar-download-manager/blob/master/LICENSE)
