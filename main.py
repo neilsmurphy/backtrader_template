@@ -234,7 +234,6 @@ class RunBacktest:
             limit_price=[0.08, True],
             stop_price=[0.04, True],
             trade_size=[1.0, True],
-            username=['otherdeafaultname', True],
         )
 
         # Create and modify the parameters values dictionary
@@ -562,9 +561,6 @@ class Strategy(StandardStrategy):
         super().__init__()
         self.ord = None
 
-        # print(f"This is the temp name parameter: {self.p.username}")
-
-        """ Average True Range"""
         self.sma_cross = SmaCross(sma_fast=self.p.sma_fast, sma_slow=self.p.sma_slow)
 
         self.long_buy_signal = self.sma_cross.long_buy_signal

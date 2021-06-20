@@ -26,19 +26,18 @@ reset_database = False
 
 # BACKTEST PARAMETERS
 pvalues = dict(
-    username='New User',
     batchname="Single Test",
     from_date="2016-01-01",
     trade_start="2016-09-01",
     to_date="2020-12-31",
     # duration=500,
+    initinvestment=100000,
     instrument= "FB",
     benchmark="SPY",
     sma_fast=15,
     sma_slow=30,
     limit_price=0.07,
     stop_price=0.05,
-    initinvestment=100000,
     # TERMINAL OUTPUT
     print_dev=False,
     print_orders_trades=True,
@@ -46,9 +45,11 @@ pvalues = dict(
     print_final_output=True,
     printon=True,
     # SAVING
+    save_path="result",
+    save_name="my test name",
     save_result=False,
-    save_excel=False,
-    save_tearsheet=False,
+    save_excel=True,
+    save_tearsheet=True,
     save_db=False,
     full_export=True,
 )
