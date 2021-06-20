@@ -1,3 +1,9 @@
+
+[![GitHub issues:](https://img.shields.io/github/issues/neilsmurphy/backtrader-template)](https://github.com/neilsmurphy/backtrader-template/issues)
+[![GitHub stars:](https://img.shields.io/github/stars/neilsmurphy/sharadar-download-manager)](https://github.com/neilsmurphy/sharadar-download-manager/stargazers)
+[![GitHub license:](https://img.shields.io/github/license/neilsmurphy/sharadar-download-manager)](https://github.com/neilsmurphy/sharadar-download-manager/blob/master/LICENSE)
+![Style:](https://img.shields.io/badge/code%20style-black-black)
+
 # Backtrader Template
 Backtrader Template creates new environments for onboarding clients at 
 RunBacktest. The benefits of working with Backtrader Template are: 
