@@ -1,7 +1,7 @@
 
 [![GitHub issues:](https://img.shields.io/github/issues/neilsmurphy/backtrader_template)](https://github.com/neilsmurphy/backtrader_template/issues)
-[![GitHub stars:](https://img.shields.io/github/stars/neilsmurphy/sharadar-download-manager)](https://github.com/neilsmurphy/sharadar-download-manager/stargazers)
-[![GitHub license:](https://img.shields.io/github/license/neilsmurphy/sharadar-download-manager)](https://github.com/neilsmurphy/sharadar-download-manager/blob/master/LICENSE)
+[![GitHub stars:](https://img.shields.io/github/stars/neilsmurphy/backtrader_template)](https://github.com/neilsmurphy/backtrader_template/stargazers)
+[![GitHub license:](https://img.shields.io/github/license/neilsmurphy/backtrader_template)](https://github.com/neilsmurphy/backtrader_template/blob/master/LICENSE)
 ![Style:](https://img.shields.io/badge/code%20style-black-black)
 
 # Backtrader Template
