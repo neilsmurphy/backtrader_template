@@ -95,7 +95,7 @@ gives more control of the actual trade start date.
 
 `print_dev` is used for custom logging. You can change this in `extension/strategy.py`.
 
-Multiple backtest can be fun for optimization. All that is required is to use list 
+Multiple backtest can be run for optimization. All that is required is to use list 
 where your parameters would be. 
 
 For example, run the following tests: 
@@ -210,7 +210,8 @@ A discussion about memory. I try to separate analyzers into two categories. Thos
 that essentially have one line output per test, and analyzers that have multiple lines
 per test. If I'm only executing a modest number of backtests, I will go ahead and use a
 'full_export' to the database, meaning all analyzers. But saving OHLV data and other
-such large datasets is not conducive to large backtest. For large backtests I will set
+such large datasets is not conducive to large numbers of backtests. For large 
+backtests I will set
 'full_export=False' which is good for fast backtesting. You can control which analyzers
 are included in full or not full in the extension/analyzer module at the bottom. 
 
@@ -224,10 +225,10 @@ There are two analysis notebooks.
    heatmaps. 
 
 #### Create new parameters
-To add a new parameter to the backtest, just add it into the RunBacktest class `self.
-params` dictionary. The default for the parameter is placed in the first position of 
-the list. This will then become available in the strat as a parameter. For example, 
-adding in `rsi` as a true/false parameter: 
+To add a new parameter to the backtest, just add it into the RunBacktest class 
+`self.params` dictionary found in `main.py`. The default for the parameter is placed in the 
+first position of the list. This will then become available in the strat as a 
+parameter. For example, adding in `rsi` as a true/false parameter: 
 
 ```rsi=[True, True],```
 
