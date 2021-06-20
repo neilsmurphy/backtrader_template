@@ -257,21 +257,21 @@ needed. Modules that are stored here are:
 - strategy: Superclass for strategy with standard methods.
 
 
-## Dependencies
-Packages required: 
-[Black](https://github.com/psf/black)
-[Dash Bootstrap Components](https://dash-bootstrap-components.opensource.faculty.ai)
-[Jupyter](https://jupyter.org)
-[Quandl](https://github.com/quandl/quandl-python)  
-[Pandas](https://github.com/pandas-dev/pandas)
-[Plot.ly](https://plotly.com/python/)
-[Plot.ly Dasy](https://plotly.com/dash/)
-[tabulate](https://github.com/astanin/python-tabulate)
-[urllib3](https://urllib3.readthedocs.io)
-[XlsxWriter](https://github.com/jmcnamara/XlsxWriter)
-[Yfinance](https://github.com/ranaroussi/yfinance)
+## Dependencies  
+Packages required:   
+[Black](https://github.com/psf/black)  
+[Dash Bootstrap Components](https://dash-bootstrap-components.opensource.faculty.ai)  
+[Jupyter](https://jupyter.org)  
+[Quandl](https://github.com/quandl/quandl-python)    
+[Pandas](https://github.com/pandas-dev/pandas)  
+[Plot.ly](https://plotly.com/python/)  
+[Plot.ly Dasy](https://plotly.com/dash/)  
+[tabulate](https://github.com/astanin/python-tabulate)  
+[urllib3](https://urllib3.readthedocs.io)  
+[XlsxWriter](https://github.com/jmcnamara/XlsxWriter)  
+[Yfinance](https://github.com/ranaroussi/yfinance)  
 ## License
-[MIT](https://github.com/neilsmurphy/backtrader_template/blob/master/LICENSE)
+[MIT](https://github.com/neilsmurphy/backtrader_template/blob/master/LICENSE)  
 
 ## Contact
 If you wish to contact me, I can be reached: 
