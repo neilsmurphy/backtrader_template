@@ -68,8 +68,7 @@ class RunBacktest:
           Execute backtest using multi-processng.
 
       - ``reset_database`` (bool: default ``False``)
-          If using a database, clear the database. Database variables are stored in
-          .env file.
+          If using a database, clear the database.
 
       Following are the params values contained in the params dictionary:
       - ``batchname`` (str: default ``None``)
@@ -78,8 +77,8 @@ class RunBacktest:
       - ``batch_runtime`` (datetime: default ``now``)
           Time of batch execution.
 
-      - ``db_name`` (str: default ``from .env``)
-          Name of database taken from .env file.
+      - ``db_name`` (str: default)
+          Name of database.
 
       - ``test_number`` (UUID: )
           Truncated UUID number, calculated. Unique identifier.
@@ -207,6 +206,7 @@ class RunBacktest:
             db_name=[os.getenv("db_name"), False],
             test_number=[0, True],
             save_result=[False, False],
+            save_tearsheet=[False, False],
             save_excel=[False, False],
             save_db=[False, False],
             full_export=[True, False],
@@ -222,7 +222,7 @@ class RunBacktest:
             initinvestment=[10000, False],
             commission=[0.0, True],
             margin=[None, False],
-            mult=[50, True],
+            mult=[1, True],
             print_dev=[False, False],
             print_orders_trades=[False, False],
             printon=[False, False],
@@ -595,12 +595,9 @@ class Strategy(StandardStrategy):
             return
 
         if self.long_buy_signal and self.getposition().size <= 0:
-            if self.getposition().size < 0:
-                self.close()
-
             limit_price = self.datas[0].close[0] * (1 + self.p.limit_price)
             stop_price = self.datas[0].close[0] * (1 - self.p.stop_price)
-            size = (self.broker.get_value() * .9) / self.datas[0].close[0]
+            size = (self.broker.get_value() * 0.9) / self.datas[0].close[0]
 
             order = self.buy_bracket(
                 size=size,

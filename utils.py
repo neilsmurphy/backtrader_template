@@ -13,58 +13,34 @@
 # along with this program.  If not, see... https://bit.ly/2Tlr9ii
 #
 ###############################################################################
-
 from datetime import datetime
 import itertools
 import math
-import os
-
-from sqlalchemy import create_engine
-
-from dotenv import load_dotenv
-
-load_dotenv()
-
+from pathlib import Path
+import sqlite3
 
 def time_str_to_datetime(time):
     return datetime.strptime(time, "%H:%M").time()
 
-
 def round_down(x):
     return math.trunc(x * 4) / 4
 
-
 def round_up(x):
     return math.ceil(x * 4) / 4
-
 
 def time_tuple(d):
     keys, values = zip(*d.items())
     return [tuple(dict(zip(keys, v)).items()) for v in itertools.product(*values)]
 
-
 def create_db_connection():
     """
     Opens a database connection.
-
-    This function requires that environment variables be set for the vars:
-        backtrader_db_type
-        backtrader_db_host
-        backtrader_db_user
-        backtrader_db_password
-
-    The easiest way to set these variables is just to add a .env file to
-    the main directory.
     """
-    db_name = os.getenv("db_name")
-    db_type = os.getenv("db_type")
-    host = os.getenv("db_host")
-    user = os.getenv("db_user")
-    password = os.getenv("db_password")
-
-    connection_string = f"{db_type}://{user}:{password}@{host}/{db_name}"
-    return create_engine(connection_string, echo=False)
-
+    Path("data").mkdir(parents=True, exist_ok=True)
+    dir = Path("data")
+    filename = "results.db"
+    filepath = dir / filename
+    return sqlite3.connect(filepath)
 
 def yes_or_no(question):
     """ Simple yes no choice function. """
@@ -76,34 +52,25 @@ def yes_or_no(question):
     else:
         return yes_or_no("Please enter y/n")
 
-
 def clear_database():
-    engine = create_db_connection()
-
-    sql_list = [
-        "DROP SCHEMA public CASCADE;",
-        "CREATE SCHEMA public;",
-        "GRANT ALL ON SCHEMA public TO postgres;",
-        "GRANT ALL ON SCHEMA public TO public;",
-        "GRANT ALL ON SCHEMA public TO admin;",
-        "COMMENT ON SCHEMA public IS 'standard public schema';",
-    ]
-    for sql in sql_list:
-        engine.execute(sql)
-
-    # cursor.close()
-    engine.dispose()
-    print("Database was reset.")
-
+    try:
+        remove_db = Path('data/results.db')
+        remove_db.unlink()
+    except:
+        pass
 
 def df_to_db(agg_dict):
-    """ Saves results dataframes to the postgres database """
+    """ Saves results dataframes to the sqlite3 database"""
     engine = create_db_connection()
 
     for table_name, df in agg_dict.items():
-        df.to_sql(
-            table_name, con=engine, if_exists="append", index=False, method="multi"
-        )
-
-    engine.dispose()
+        try:
+            # Remove whitespace before going to sql.
+            df.columns = [name.replace(" ", "_") for name in df.columns]
+            df.to_sql(
+                table_name, con=engine, if_exists="append", index=False
+            )
+        except Exception as e:
+            print(f"{e} {table_name} failed.")
+    engine.close()
 

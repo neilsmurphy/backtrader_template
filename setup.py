@@ -18,11 +18,10 @@ from main import RunBacktest
 
 """ User module to setup test parameters and launch tests. """
 
-
 # GENERAL SETTINGS
 print_params = True
 run_test_now = True
-multi_pro = False
+multi_pro = True
 reset_database = True
 
 # BACKTEST PARAMETERS
@@ -33,23 +32,23 @@ pvalues = dict(
     trade_start="2016-09-01",
     to_date="2020-12-31",
     # duration=500,
-    instrument="FB", # ["F", "TSLA", "AAPL", "FB", "V", "BAC"],
+    instrument= "FB",  # ["F", "TSLA", "AAPL", "FB", "V", "BAC"],
     benchmark="SPY",
-    sma_fast=15, #list(range(15, 61, 30)),
-    sma_slow=30, #list(range(30, 91, 30)),
-    limit_price=.05, #[.025, .05, .075],
-    stop_price=.05, # [.03, .05, .07, .09],
-    trade_size=10,
-    initinvestment=1000000,
+    sma_fast=list(range(15, 61, 30)),
+    sma_slow=list(range(30, 91, 30)),
+    limit_price=0.05,  #  [.025, .05, .075],
+    stop_price=0.05,  # [.03, .05, .07, .09],
+    initinvestment=100000,
     # TERMINAL OUTPUT
     print_dev=False,
     print_orders_trades=True,
     print_ohlcv=-1,  # `-1` for no print, otherwise feed the dataline number.
-    print_final_output=False,
-    printon=False,
+    print_final_output=True,
+    printon=True,
     # SAVING
     save_result=True,
     save_excel=False,
+    save_tearsheet=False,
     save_db=True,
     full_export=True,
 )
