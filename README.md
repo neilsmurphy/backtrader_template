@@ -272,3 +272,10 @@ Packages required:
 [Yfinance](https://github.com/ranaroussi/yfinance)
 ## License
 [MIT](https://github.com/neilsmurphy/backtrader_template/blob/master/LICENSE)
+
+## Contact
+If you wish to contact me, I can be reached: 
+
+Neil Murphy  
+neil@runbacktest.com  
+[RunBacktest](https://runbacktest.com)  
