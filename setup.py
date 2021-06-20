@@ -21,23 +21,23 @@ from main import RunBacktest
 # GENERAL SETTINGS
 print_params = True
 run_test_now = True
-multi_pro = True
-reset_database = True
+multi_pro = False
+reset_database = False
 
 # BACKTEST PARAMETERS
 pvalues = dict(
-    username='runout',
+    username='New User',
     batchname="Single Test",
     from_date="2016-01-01",
     trade_start="2016-09-01",
     to_date="2020-12-31",
     # duration=500,
-    instrument= "FB",  # ["F", "TSLA", "AAPL", "FB", "V", "BAC"],
+    instrument= "FB",
     benchmark="SPY",
-    sma_fast=list(range(15, 61, 30)),
-    sma_slow=list(range(30, 91, 30)),
-    limit_price=[.025, .05, .075],
-    stop_price=[.03, .05, .07, .09],
+    sma_fast=15,
+    sma_slow=30,
+    limit_price=0.07,
+    stop_price=0.05,
     initinvestment=100000,
     # TERMINAL OUTPUT
     print_dev=False,
@@ -46,13 +46,12 @@ pvalues = dict(
     print_final_output=True,
     printon=True,
     # SAVING
-    save_result=True,
+    save_result=False,
     save_excel=False,
     save_tearsheet=False,
-    save_db=True,
+    save_db=False,
     full_export=True,
 )
-
 
 set_bt = RunBacktest(
     pvalue=pvalues,
