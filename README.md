@@ -80,7 +80,7 @@ The first section of the backtest contains:
 |save_result|Backtest results save to excel, tearsheet, or database. False is terminal only. (True/False)|
 |save_excel|Save detailed backtest results to a spreadsheet. (True/False)|
 |save_tearsheet|Save quanstats tearsheet to `results`. (True/False)|
-|save_db|Save backtest results to the database for use with dashboard. (True/False)|
+|save_db|Save backtest results to the database for use with analysis. (True/False)|
 |full_export|Full export exports all of the available date. (True/False)|
 
 #### Running backtests
@@ -158,11 +158,72 @@ line 457.
 if scenario["sma_fast"] >= scenario["sma_slow"]:
     continue
 ```
-When running multiple backtest, make sure to use `multi-pr0 = True` to turn on the 
+When running multiple backtest, make sure to use `multi-pro = True` to turn on the 
 multi-processor. The multi-processor is set to use your `number of cores - 2`. 
 
 To run multiple test at once over different dates, use the `from_date` combined with 
 `duration`. `trade_start` and `to_date` are ignored. 
+
+#### Backtest results
+View your backtest results on the terminal, save to excel, database, or create a 
+tearsheet. 
+
+##### Terminal
+There are several options for diplaying backtest results to the terminal. 
+To view all orders and trades, `print_orders_trades`. 
+One can also select to view all of the ohlcv candles using `print_ohlcv=0`. If there 
+are more than one data lines in the backtest, select increasing increments, eg: 
+`print_ohlcv=1` to find the desired dataline. Use `-1` for off. 
+Backtrader template offers a trade output list which can be accessed via 
+`print_final_output=True` [Thanks to https://github.com/ab-trader]
+There are some sundry printouts such as the final value, etc. `printon=True`
+Also is available the ability to create a custom log to terminal using 
+'print_dev=False,' This can be modified in `extensions/strategy.py`.
+
+##### To disk
+There are three options for saving to disk. To turn on/off saving in general, use 
+`save_result=False`. To set the path for saving, `save_path="result"` This will 
+save to the "result" directory. It is not necessary to create the directory, it will 
+be made if not already existing. A custom name can be added to the output file names.
+`save_name="my test name"`.
+To save to excel, use `save_excel=True`. The spreadsheet will have multple tabs with 
+the following information: 
+- trade_list: Summary of all trades. 
+- trade_analysis: Backtraders detailed backtest [TradeAnalysis](https://www.backtrader.com/docu/analyzers-reference/#tradeanalyzer). 
+- drawdown: Overall drawdown stats.
+- transaction: Each transaction, including partial fills. 
+- value: Cash and market value at each bar. 
+- trade: Backtrader's trade summary. 
+- ohlcv: Stock OHLCV bars. 
+- benchmark: Benchmark OHLCV bars.
+- dimension: These are the input parameters and other settings for the backtest. 
+
+The above data can also be saved to database using `save_db=True` This is necessary 
+for analysis. This default template uses SQLite3 for simplicity, but any database 
+could be used. I personally use postgres. 
+
+There is a very nice tearsheet provided by [QuantStats](https://github.
+com/ranaroussi/quantstats). This can be accessed by using `save_tearsheet=True`. 
+Here is a sample: [Tearsheet](result/my test name-Single Test-20210620_0802.html)
+
+
+##### Memory
+A discussion about memory. I try to separate analyzers into two categories. Those
+that essentially have one line output per test, and analyzers that have multiple lines
+per test. If I'm only executing a modest number of backtests, I will go ahead and use a
+'full_export' to the database, meaning all analyzers. But saving OHLV data and other
+such large datasets is not conducive to large backtest. For large backtests I will set
+'full_export=False' which is good for fast backtesting. You can control which analyzers
+are included in full or not full in the extension/analyzer module at the bottom. 
+
+#### Analysis
+There are two analysis notebooks. 
+1. single_analysis.ipynb
+   Used to provide a detailed analysis for a single backtest. The charts are the 
+   same as contained in the tearsheet. 
+2. analysis.ipynb
+   Used for comparing multiple spreadsheets across parameters primarily using 
+   heatmaps. 
 
 #### Create new parameters
 To add a new parameter to the backtest, just add it into the RunBacktest class `self.
@@ -180,15 +241,6 @@ self.p.rsi
 The second parameter is boolean and is used to determine if this 
 parameter is exported to the database after running the backtest for use in analysis. 
 
-
-#### Memory
-A discussion about memory. I try to separate analyzers into two categories. Those
-that essentially have one line output per test, and analyzers that have multiple lines 
-per test. If I'm only executing a modest number of backtests, I will go ahead and use a 
-'full_export' to the database, meaning all analyzers. But saving OHLV data and other 
-such large datasets is not conducive to large backtest. For large backtests I will set 
-'full_export=False' which is good for fast backtesting. You can control which analyzers 
-are included in full or not full in the extension/analyzer module at the bottom. 
 
 #### Extensions
 Separate modules are stored in the extension directory and then import to main as 

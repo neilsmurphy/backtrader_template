@@ -34,8 +34,8 @@ pvalues = dict(
     initinvestment=100000,
     instrument= "FB",
     benchmark="SPY",
-    sma_fast=15,
-    sma_slow=30,
+    sma_fast=30,
+    sma_slow=45,
     limit_price=0.07,
     stop_price=0.05,
     # TERMINAL OUTPUT
