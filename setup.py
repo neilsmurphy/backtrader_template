@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Software program written by Neil Murphy in year 2020.
+# Software program written by Neil Murphy in year 2021.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -36,8 +36,8 @@ pvalues = dict(
     benchmark="SPY",
     sma_fast=list(range(15, 61, 30)),
     sma_slow=list(range(30, 91, 30)),
-    limit_price=0.05,  #  [.025, .05, .075],
-    stop_price=0.05,  # [.03, .05, .07, .09],
+    limit_price=[.025, .05, .075],
+    stop_price=[.03, .05, .07, .09],
     initinvestment=100000,
     # TERMINAL OUTPUT
     print_dev=False,

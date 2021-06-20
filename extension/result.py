@@ -1,6 +1,6 @@
 ###############################################################################
 #
-# Software program written by Neil Murphy in year 2020.
+# Software program written by Neil Murphy in year 2021.
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
