@@ -1,0 +1,3 @@
+*.ipynb linguist-language=Python
+.ipynb_checkpoints/* linguist-vendored
+data/.ipynb_checkpoints/* linguist-vendored
