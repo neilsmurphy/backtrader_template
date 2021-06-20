@@ -202,10 +202,8 @@ The above data can also be saved to database using `save_db=True` This is necess
 for analysis. This default template uses SQLite3 for simplicity, but any database 
 could be used. I personally use postgres. 
 
-There is a very nice tearsheet provided by [QuantStats](https://github.
-com/ranaroussi/quantstats). This can be accessed by using `save_tearsheet=True`. 
-Here is a sample: [Tearsheet](result/my test name-Single Test-20210620_0802.html)
-
+There is a very nice tearsheet provided by [QuantStats](https://github.com/ranaroussi/quantstats). This can be accessed by using `save_tearsheet=True`. 
+Here is a sample: [Tearsheet](result/my test name-Single Test-20210620_0802.jpg)
 
 ##### Memory
 A discussion about memory. I try to separate analyzers into two categories. Those
