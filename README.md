@@ -1,3 +1,9 @@
+
+[![GitHub issues:](https://img.shields.io/github/issues/neilsmurphy/backtrader_template)](https://github.com/neilsmurphy/backtrader_template/issues)
+[![GitHub stars:](https://img.shields.io/github/stars/neilsmurphy/backtrader_template)](https://github.com/neilsmurphy/backtrader_template/stargazers)
+[![GitHub license:](https://img.shields.io/github/license/neilsmurphy/backtrader_template)](https://github.com/neilsmurphy/backtrader_template/blob/master/LICENSE)
+![Style:](https://img.shields.io/badge/code%20style-black-black)
+
 # Backtrader Template
 Backtrader Template creates new environments for onboarding clients at 
 RunBacktest. The benefits of working with Backtrader Template are: 
@@ -251,6 +257,7 @@ needed. Modules that are stored here are:
 - strategy: Superclass for strategy with standard methods.
 
 
+
 ## CCXT and crypto currencies
 Now encorporated is Dave Valance/Ed Bartosh ccxt stores into backtrader. You can now 
 backtest cryptos on a wide variety of exchanges. Once backtested, you can sandbox test 
@@ -301,3 +308,25 @@ store = CCXTStore(
     exchange="binance", currency="USDT", config=config, retries=5, debug=False, sandbox=True
 )
 ```
+## Dependencies  
+Packages required:   
+[Black](https://github.com/psf/black)  
+[Dash Bootstrap Components](https://dash-bootstrap-components.opensource.faculty.ai)  
+[Jupyter](https://jupyter.org)  
+[Quandl](https://github.com/quandl/quandl-python)    
+[Pandas](https://github.com/pandas-dev/pandas)  
+[Plot.ly](https://plotly.com/python/)  
+[Plot.ly Dasy](https://plotly.com/dash/)  
+[tabulate](https://github.com/astanin/python-tabulate)  
+[urllib3](https://urllib3.readthedocs.io)  
+[XlsxWriter](https://github.com/jmcnamara/XlsxWriter)  
+[Yfinance](https://github.com/ranaroussi/yfinance)  
+## License
+[MIT](https://github.com/neilsmurphy/backtrader_template/blob/master/LICENSE)  
+
+## Contact
+If you wish to contact me, I can be reached: 
+
+Neil Murphy  
+neil@runbacktest.com  
+[RunBacktest](https://runbacktest.com)  
