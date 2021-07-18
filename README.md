@@ -249,3 +249,55 @@ needed. Modules that are stored here are:
 - result: For generating spreadsheets and database outputs. 
 - sizer: Can be used for sizing trades. (Not used in default settings.)
 - strategy: Superclass for strategy with standard methods.
+
+
+## CCXT and crypto currencies
+Now encorporated is Dave Valance/Ed Bartosh ccxt stores into backtrader. You can now 
+backtest cryptos on a wide variety of exchanges. Once backtested, you can sandbox test 
+your algo, then go live. 
+
+The sample included is Binance. Set up your parameters as per the `params-template.json` 
+file. 
+
+| WARNING Do not mix up your testnet and your live trading. `Testnet` is a fake sandbox account trading pretend money, `actual` trading is live with your money.   |
+|-----------------------------------------|
+
+I have set up two apis, one for actual trading and one for the testnet sandbox. 
+```python
+ "binance_actual": {
+    "apikey": "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "secret": "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "testorders": true
+  },
+
+  "binance_testnet": {
+    "apikey": "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "secret": "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+    "testorders": true
+  },
+```
+
+Create your configs for your store. For the testnet use: 
+```python
+config = {'urls': {'api': 'https://testnet.binance.vision/api'},
+          "apiKey": params["binance_testnet"]["apikey"],
+          "secret": params["binance_testnet"]["secret"],
+          "enableRateLimit": True,
+          }
+```
+
+For your actual store with live trading, use: 
+```python
+config = {
+    "apiKey": params["binance_actual"]["apikey"],
+    "secret": params["binance_actual"]["secret"],
+    "enableRateLimit": True,
+}
+```
+When trading on the sandbox, set `sandbox=True` when creating the store. And `sandbox=False` 
+when trading live. 
+```python
+store = CCXTStore(
+    exchange="binance", currency="USDT", config=config, retries=5, debug=False, sandbox=True
+)
+```
