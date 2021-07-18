@@ -1,6 +1,6 @@
 from ccxtbt import CCXTStore
 import backtrader as bt
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import json
 
 
@@ -41,7 +41,7 @@ class TestStrategy(bt.Strategy):
 
     def notify_data(self, data, status, *args, **kwargs):
         dn = data._name
-        dt = datetime.now()
+        dt = datetime.utcnow().replace(tzinfo=timezone.utc)
         msg = "Data Status: {}".format(data._getstatusname(status))
         print(dt, dn, msg)
         if data._getstatusname(status) == "LIVE":
@@ -59,10 +59,18 @@ cerebro = bt.Cerebro(quicknotify=True)
 # Add the strategy
 cerebro.addstrategy(TestStrategy)
 
-# Create our store
-config = {
-    "apiKey": params["binance_actual"]["apikey"],
-    "secret": params["binance_actual"]["secret"],
+#
+# # Create our actual binance store
+# config = {
+#           "apiKey": params["binance_actual"]["apikey"],
+#           "secret": params["binance_actual"]["secret"],
+#           "enableRateLimit": True,
+#           }
+
+# Create our binance/testnet store
+config = {'urls': {'api': 'https://testnet.binance.vision/api'},
+    "apiKey": params["binance_testnet"]["apikey"],
+    "secret": params["binance_testnet"]["secret"],
     "enableRateLimit": True,
 }
 
@@ -71,7 +79,7 @@ config = {
 # for get cash or value if You have never held any BNB coins in your account.
 # So switch BNB to a coin you have funded previously if you get errors
 store = CCXTStore(
-    exchange="binance", currency="USDT", config=config, retries=5, debug=False
+    exchange="binance", currency="USDT", config=config, retries=5, debug=False, sandbox=True
 )
 
 
@@ -103,13 +111,13 @@ hist_start_date = datetime.utcnow() - timedelta(minutes=30)
 data = store.getdata(
     dataname="BNB/USDT",
     name="BNBUSDT",
-    timeframe=bt.TimeFrame.Days,
-    fromdate=datetime(2020, 9, 1),  # hist_start_date,
-    todate=datetime(2020, 10, 1),
+    timeframe=bt.TimeFrame.Minutes,
+    fromdate=hist_start_date,
+    # todate=datetime(2021, 7, 15),
     compression=1,
-    ohlcv_limit=50,
+    ohlcv_limit=500,
     drop_newest=True,
-    historical=True,
+    historical=False,
 )
 
 # Add the feed
