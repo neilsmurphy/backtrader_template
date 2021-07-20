@@ -367,43 +367,43 @@ def tradeanalyzer(
     return workbook, agg_dict
 
 
-def vwr(scene, analyzer, test_number, workbook=None, sheet_format=None, agg_dict=None):
-    """
-    Calculates Variability Weighted Return (VWR).
-    :param workbook: Excel workbook to be saved to disk.
-    :param analyzer: Backtest analyzer.
-    :param sheet_format: Dictionary holding formatting information such as col width, font etc.
-    :param agg_dict: Collects the dictionary outputs from backtrader for using in platting.
-    :return workbook: Excel workbook to be saved to disk.
-    """
-    # Get the drawdowns auto ordered nested dictionary
-    vwr_dict = analyzer.get_analysis()
-
-    columns = [
-        "vwr",
-    ]
-
-    if scene["save_db"]:
-        df = pd.DataFrame(vwr_dict.values(), index=vwr_dict.keys()).T
-        df = add_key_to_df(df, test_number)
-        agg_dict["vwr"] = df
-
-    if scene["save_excel"]:
-
-        worksheet = workbook.add_worksheet("vwr")
-
-        worksheet.write_row(0, 0, columns)
-
-        worksheet.set_row(0, None, sheet_format["header_format"])
-
-        worksheet.set_column("A:A", sheet_format["x_wide"], sheet_format["align_left"])
-        worksheet.set_column("B:B", sheet_format["medium"], sheet_format["align_left"])
-
-        for i, (k, v) in enumerate(vwr_dict.items()):
-            worksheet.write_row(i + 1, 0, [k])
-            worksheet.write_row(i + 1, 1, [v])
-
-    return workbook, agg_dict
+# def vwr(scene, analyzer, test_number, workbook=None, sheet_format=None, agg_dict=None):
+#     """
+#     Calculates Variability Weighted Return (VWR).
+#     :param workbook: Excel workbook to be saved to disk.
+#     :param analyzer: Backtest analyzer.
+#     :param sheet_format: Dictionary holding formatting information such as col width, font etc.
+#     :param agg_dict: Collects the dictionary outputs from backtrader for using in platting.
+#     :return workbook: Excel workbook to be saved to disk.
+#     """
+#     # Get the drawdowns auto ordered nested dictionary
+#     vwr_dict = analyzer.get_analysis()
+#
+#     columns = [
+#         "vwr",
+#     ]
+#
+#     if scene["save_db"]:
+#         df = pd.DataFrame(vwr_dict.values(), index=vwr_dict.keys()).T
+#         df = add_key_to_df(df, test_number)
+#         agg_dict["vwr"] = df
+#
+#     if scene["save_excel"]:
+#
+#         worksheet = workbook.add_worksheet("vwr")
+#
+#         worksheet.write_row(0, 0, columns)
+#
+#         worksheet.set_row(0, None, sheet_format["header_format"])
+#
+#         worksheet.set_column("A:A", sheet_format["x_wide"], sheet_format["align_left"])
+#         worksheet.set_column("B:B", sheet_format["medium"], sheet_format["align_left"])
+#
+#         for i, (k, v) in enumerate(vwr_dict.items()):
+#             worksheet.write_row(i + 1, 0, [k])
+#             worksheet.write_row(i + 1, 1, [v])
+#
+#     return workbook, agg_dict
 
 
 def drawdown_analysis(d, drawdown_analysis_dict, pk=""):
@@ -788,9 +788,9 @@ def quantstats(scene, test_number, agg_dict):
     df_qs.columns = [test_number]
     df_qs = df_qs.T
     df_qs.index.name = "test_number"
-    df_qs.columns = df_qs.columns.str.replace("%", "-pct")
-    df_qs.columns = df_qs.columns.str.replace("(", "")
-    df_qs.columns = df_qs.columns.str.replace(")", "")
+    df_qs.columns = df_qs.columns.str.replace("%", "-pct", regex=False)
+    df_qs.columns = df_qs.columns.str.replace("(", "", regex=False)
+    df_qs.columns = df_qs.columns.str.replace(")", "", regex=False)
     df_qs = df_qs.fillna(0)
     agg_dict["quantstats"] = df_qs.reset_index()
     return agg_dict

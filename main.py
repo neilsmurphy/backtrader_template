@@ -528,6 +528,9 @@ class RunBacktest:
         if scene["print_final_output"]:
             trade_list = strat[0].analyzers.getbyname("trade_list").get_analysis()
             if len(trade_list):
+                for t in trade_list:
+                    t["datein"] = t["datein"].strftime("%Y-%m-%d %H:%M")
+                    t["dateout"] = t["dateout"].strftime("%Y-%m-%d %H:%M")
                 print(tabulate(trade_list, headers="keys"))
             else:
                 print("There were no completed trades.")

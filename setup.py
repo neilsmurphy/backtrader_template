@@ -32,25 +32,25 @@ pvalues = dict(
     to_date="2020-12-31",
     # duration=500,
     initinvestment=100000,
-    instrument= "FB",
+    instrument="FB",
     benchmark="SPY",
-    sma_fast=30,
+    sma_fast=15,
     sma_slow=45,
     limit_price=0.07,
     stop_price=0.05,
     # TERMINAL OUTPUT
     print_dev=False,
-    print_orders_trades=True,
+    print_orders_trades=False,
     print_ohlcv=-1,  # `-1` for no print, otherwise feed the dataline number.
     print_final_output=True,
-    printon=True,
+    printon=False,
     # SAVING
     save_path="result",
     save_name="my test name",
-    save_result=False,
-    save_excel=True,
-    save_tearsheet=True,
-    save_db=False,
+    save_result=True,
+    save_excel=False,
+    save_tearsheet=False,
+    save_db=True,
     full_export=True,
 )
 

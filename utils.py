@@ -36,11 +36,13 @@ def create_db_connection():
     """
     Opens a database connection.
     """
+    root = Path(__file__).parent
     Path("data").mkdir(parents=True, exist_ok=True)
     dir = Path("data")
     filename = "results.db"
-    filepath = dir / filename
-    return sqlite3.connect(filepath)
+    filepath = root / dir / filename
+    return sqlite3.connect(filepath, uri=False)
+
 
 def yes_or_no(question):
     """ Simple yes no choice function. """

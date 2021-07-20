@@ -85,12 +85,8 @@ class TradeList(bt.analyzers.Analyzer):
 
             pricein = trade.history[len(trade.history) - 1].status.price
             priceout = trade.history[len(trade.history) - 1].event.price
-            datein = bt.num2date(trade.history[0].status.dt).date()
-            dateout = bt.num2date(trade.history[len(trade.history) - 1].status.dt).date()
-
-            # if trade.data._timeframe >= bt.TimeFrame.Days:
-            #     datein = datein.date()
-            #     dateout = dateout.date()
+            datein = bt.num2date(trade.history[0].status.dt)  # .date()
+            dateout = bt.num2date(trade.history[len(trade.history) - 1].status.dt)  # .date()
 
             pcntchange = 100 * priceout / pricein - 100
             pnl = trade.history[len(trade.history) - 1].status.pnlcomm
