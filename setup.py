@@ -22,11 +22,12 @@ from main import RunBacktest
 print_params = True
 run_test_now = True
 multi_pro = False
-reset_database = False
+reset_database = True
+broker = 'ccxt'  # `backbroker`, `ib`, `ccxt`
 
 # BACKTEST PARAMETERS
 pvalues = dict(
-    batchname="Single Test",
+    batchname="tran reformat",
     from_date="2016-01-01",
     trade_start="2016-09-01",
     to_date="2020-12-31",
@@ -40,10 +41,11 @@ pvalues = dict(
     stop_price=0.05,
     # TERMINAL OUTPUT
     print_dev=False,
-    print_orders_trades=False,
-    print_ohlcv=-1,  # `-1` for no print, otherwise feed the dataline number.
+    print_orders_trades=True,
+    print_ohlcv=0,  # `-1` for no print, otherwise feed the dataline number.
     print_final_output=True,
-    printon=False,
+    printon=True,
+    dashboard=True,
     # SAVING
     save_path="result",
     save_name="my test name",
@@ -60,6 +62,7 @@ set_bt = RunBacktest(
     run_test_now=run_test_now,
     multi_pro=multi_pro,
     reset_database=reset_database,
+    broker=broker,
 )
 
 set_bt.run_backtest()

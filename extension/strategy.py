@@ -13,6 +13,7 @@
 # along with this program.  If not, see... https://bit.ly/2Tlr9ii
 #
 ###############################################################################
+import datetime
 import backtrader as bt
 
 class StandardStrategy(bt.Strategy):
@@ -69,6 +70,17 @@ class StandardStrategy(bt.Strategy):
                 )
             else:
                 pass
+
+    def notify_data(self, data, status, *args, **kwargs):
+        dn = data._name
+
+        dt = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+        msg = "Data Status: {}".format(data._getstatusname(status))
+        print(dt, dn, msg)
+        if data._getstatusname(status) == "LIVE":
+            self.live_data = True
+        else:
+            self.live_data = False
 
     def print_signal(self, dataline):
         """ Print out OHLCV. """

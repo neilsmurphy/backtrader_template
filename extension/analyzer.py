@@ -14,6 +14,7 @@
 #
 ###############################################################################
 import backtrader as bt
+from utils import create_db_connection, write_row
 
 
 class GlobalOutput(bt.analyzers.Analyzer):
@@ -46,7 +47,6 @@ class GlobalOutput(bt.analyzers.Analyzer):
             global_values.update(d)
         except:
             pass
-
 
         self.rets[self.data.datetime.datetime()] = global_values
 
@@ -86,7 +86,9 @@ class TradeList(bt.analyzers.Analyzer):
             pricein = trade.history[len(trade.history) - 1].status.price
             priceout = trade.history[len(trade.history) - 1].event.price
             datein = bt.num2date(trade.history[0].status.dt)  # .date()
-            dateout = bt.num2date(trade.history[len(trade.history) - 1].status.dt)  # .date()
+            dateout = bt.num2date(
+                trade.history[len(trade.history) - 1].status.dt
+            )  # .date()
 
             pcntchange = 100 * priceout / pricein - 100
             pnl = trade.history[len(trade.history) - 1].status.pnlcomm
@@ -164,7 +166,12 @@ class OrderHistory(bt.analyzers.Analyzer):
                         valid=o.valid,
                     )
 
-                    self.rets[(dt, o.ref,)] = order_detail
+                    self.rets[
+                        (
+                            dt,
+                            o.ref,
+                        )
+                    ] = order_detail
             except:
                 pass
 
@@ -257,17 +264,24 @@ class OHLCV(bt.analyzers.Analyzer):
     def next(self):
         # Create custom volume for plotting higher volumes in bright yellow,
         # grey out lower volume.
-
+        row = [
+            0,
+            self.datas[0].datetime.datetime(),
+            self.datas[0].open[0],
+            self.datas[0].high[0],
+            self.datas[0].low[0],
+            self.datas[0].close[0],
+            self.datas[0].volume[0],
+        ]
         try:
-            self.rets[self.datas[0].datetime.datetime()] = [
-                self.datas[0].open[0],
-                self.datas[0].high[0],
-                self.datas[0].low[0],
-                self.datas[0].close[0],
-                self.datas[0].volume[0],
-            ]
+            self.rets[row[1]] = row[2:]
         except:
             pass
+
+        if self.strategy.p.dashboard and self.strategy.p.broker != "backbroker":
+            conn = create_db_connection(db='live')
+            write_row(conn, "ohlcv", row)
+            conn.close()
 
     def get_analysis(self):
         return self.rets
@@ -302,6 +316,7 @@ class AddAnalyzer:
     """
     Adds the analyzers to cerebro and returns cerebro to the ``run_strat``.
     """
+
     def __init__(self, cerebro):
         self.cerebro = cerebro
 
@@ -309,13 +324,6 @@ class AddAnalyzer:
         # Analyzers. Custom analyzers can be found in extensions/analyzer.py
         # Analyzers returned in the strategy object
         scene = self.cerebro.strats[0][0][2]
-        # self.cerebro.addanalyzer(
-        #     bt.analyzers.VariabilityWeightedReturn,
-        #     _name="VWR",
-        #     timeframe=bt.TimeFrame.Days,
-        #     tau=2.0,
-        #     sdev_max=0.2,
-        # )
 
         # For all tests, but mainly high volume multi-processor tests.
         self.cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name="trades")
@@ -328,12 +336,10 @@ class AddAnalyzer:
         # individual backtests.
         if scene["full_export"]:
             self.cerebro.addanalyzer(bt.analyzers.Transactions, _name="transactions")
-            self.cerebro.addanalyzer(TradeClosed, _name="trade_closed")
+            # self.cerebro.addanalyzer(TradeClosed, _name="trade_closed")
             self.cerebro.addanalyzer(OHLCV, _name="OHLCV")
             self.cerebro.addanalyzer(Benchmark, _name="benchmark")
             self.cerebro.addanalyzer(GlobalOutput, _name="global_signal")
             self.cerebro.addanalyzer(OrderHistory, _name="order_history")
-
-
 
         return self.cerebro

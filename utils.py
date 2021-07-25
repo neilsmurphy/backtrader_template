@@ -32,18 +32,6 @@ def time_tuple(d):
     keys, values = zip(*d.items())
     return [tuple(dict(zip(keys, v)).items()) for v in itertools.product(*values)]
 
-def create_db_connection():
-    """
-    Opens a database connection.
-    """
-    root = Path(__file__).parent
-    Path("data").mkdir(parents=True, exist_ok=True)
-    dir = Path("data")
-    filename = "results.db"
-    filepath = root / dir / filename
-    return sqlite3.connect(filepath, uri=False)
-
-
 def yes_or_no(question):
     """ Simple yes no choice function. """
     reply = str(input(f"{question} (y/n): ")).lower().strip()
@@ -54,16 +42,31 @@ def yes_or_no(question):
     else:
         return yes_or_no("Please enter y/n")
 
-def clear_database():
-    try:
-        remove_db = Path('data/results.db')
-        remove_db.unlink()
-    except:
-        pass
+""" Database Utilities """
+
+def create_db_connection(db=None):
+    """
+    Opens a database connection.
+    """
+    root = Path(__file__).parent
+    Path("data").mkdir(parents=True, exist_ok=True)
+    dir = Path("data")
+
+    if db == "backtest":
+        filename = "backtest.db"
+    elif db == "live":
+        filename = "live.db"
+    else:
+        raise ValueError(
+            "You must indicate which database you are connecting to. "
+            "You may choose either `backtest` or `live`"
+        )
+    filepath = root / dir / filename
+    return sqlite3.connect(filepath, uri=False)
 
 def df_to_db(agg_dict):
     """ Saves results dataframes to the sqlite3 database"""
-    engine = create_db_connection()
+    engine = create_db_connection(db="backtest")
 
     for table_name, df in agg_dict.items():
         try:
@@ -76,3 +79,33 @@ def df_to_db(agg_dict):
             print(f"{e} {table_name} failed.")
     engine.close()
 
+def clear_database(db=None):
+    conn = create_db_connection(db=db)
+    clear_tables(conn)
+
+def clear_tables(conn):
+    tables = all_tables(conn)
+    # cursor = conn.cursor()
+    for table in tables:
+        sql = f'DELETE FROM {table};'
+        conn.execute(sql);
+
+    conn.commit()
+    # cursor.close()
+    conn.close()
+
+def all_tables(conn):
+    cursor = conn.execute(f"SELECT name FROM sqlite_master WHERE type='table';")
+    tables = [
+        v[0] for v in cursor.fetchall()
+        if v[0] != "sqlite_sequence"
+    ]
+    cursor.close()
+    return tables
+
+def write_row(conn, table, row):
+    sql = f"INSERT INTO {table}(test_number, Date, Open, High, Low, Close, Volume)" \
+          f"VALUES (?, ?, ?, ?, ?, ?, ?) "
+    cur = conn.cursor()
+    cur.execute(sql, row)
+    conn.commit()

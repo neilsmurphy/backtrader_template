@@ -49,7 +49,7 @@ class TestStrategy(bt.Strategy):
         else:
             self.live_data = False
 
-
+# Binance
 with open("./params.json", "r") as f:
     params = json.load(f)
 

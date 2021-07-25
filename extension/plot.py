@@ -39,9 +39,11 @@ class backtest_plot:
     def __init__(self, test_number):
         self.test_number = test_number
         self.start_plot_date = self.get_start_plot_date()
+        self.dfs = self.get_plot_data()
+        x=1
 
     def get_connection(self):
-        return create_db_connection()
+        return create_db_connection(db="live")
 
     def get_start_plot_date(self):
         with self.get_connection() as conn:
@@ -138,10 +140,12 @@ class backtest_plot:
         )
         return layout
 
-    def ohlc_data(self, fig, df):
+    def ohlc(self, df=None):
         """ Plot data for OHLC """
+        if df is None:
+            df = self.dfs["ohlcv"]
         df = df.reset_index()
-        fig_ohlc = go.Figure(
+        fig = go.Figure(
             data=[
                 go.Candlestick(
                     name="ES Mini",
@@ -153,10 +157,12 @@ class backtest_plot:
                 )
             ]
         )
+        return fig
+        # return fig.add_trace(fig_ohlc.data[0], row=1, col=1)
 
-        return fig.add_trace(fig_ohlc.data[0], row=1, col=1)
-
-    def trade_list(self, fig, df):
+    def trade_list(self, df=None):
+        if df is None:
+            df = self.dfs["trade_list"]
         df['datein'] = pd.to_datetime(df['datein'])
         df['dateout'] = pd.to_datetime(df['dateout'])
 
@@ -184,7 +190,7 @@ class backtest_plot:
             template_string += t_string
 
         # Trade in
-        fig_tl_in = px.scatter(
+        fig = px.scatter(
             df,
             x=df["datein"],
             y="pricein",
@@ -203,14 +209,15 @@ class backtest_plot:
                 marker_color = short_color
                 n = len(long_short_category) - 1
 
-            fig_tl_in.data[n].marker.symbol = 8
-            fig_tl_in.data[n].marker.size = 15
-            fig_tl_in.data[n].marker.color = marker_color
-            fig_tl_in.data[n].hovertemplate = template_string
-            fig.append_trace(fig_tl_in.data[n], row=1, col=1)
+            fig.data[n].marker.symbol = 8
+            fig.data[n].marker.size = 15
+            fig.data[n].marker.color = marker_color
+            fig.data[n].hovertemplate = template_string
+            # fig.append_trace(fig.data[n], row=1, col=1)
+
 
         # Trade out
-        fig_tl_out = px.scatter(
+        fig_out = px.scatter(
             df,
             x=df["dateout"],
             y="priceout",
@@ -227,16 +234,17 @@ class backtest_plot:
                 marker_color = short_color
                 n = len(long_short_category) - 1
 
-            fig_tl_out.data[n].marker.symbol = 7
-            fig_tl_out.data[n].marker.size = 15
-            fig_tl_out.data[n].marker.color = marker_color
-            fig_tl_out.data[n].hovertemplate = template_string
-            fig.append_trace(fig_tl_out.data[n], row=1, col=1)
+            fig_out.data[n].marker.symbol = 7
+            fig_out.data[n].marker.size = 15
+            fig_out.data[n].marker.color = marker_color
+            fig_out.data[n].hovertemplate = template_string
+            fig.append_trace(fig_out.data[n], row=1, col=1)
 
         return fig
 
-    def order_history(self, fig, df):
-
+    def order_history(self, df=None):
+        if df is None:
+            df = self.dfs["order_history"]
         df = df.set_index("Datetime")
         df.index = pd.to_datetime(df.index)
         df = df.sort_index()
@@ -276,55 +284,44 @@ class backtest_plot:
         fig_order.data[1].marker.color = short_color
         fig_order.data[1].marker.opacity = 0.75
 
-        fig.append_trace(fig_order.data[0], row=1, col=1)
-        fig.append_trace(fig_order.data[1], row=1, col=1)
+        # fig.append_trace(fig_order.data[0], row=1, col=1)
+        # fig.append_trace(fig_order.data[1], row=1, col=1)
 
-        return fig
+        return fig_order
 
-    def volume(self, fig, df):
+    def volume(self, df=None):
+        if df is None:
+            df = self.dfs["ohlcv"]
         df = df.reset_index()
-        fig_volume = px.bar(df, x=df["Datetime"], y=df["Volume"].values)
-        fig_volume.data[0].marker.color = "yellow"
-        fig.append_trace(fig_volume.data[0], row=2, col=1)
+        fig = px.bar(df, x=df["Datetime"], y=df["Volume"].values)
+        fig.data[0].marker.color = "blue"
         return fig
 
-    def cash_value(self, fig, df):
+    def cash_value(self, df=None):
+        if df is None:
+            df = self.dfs["value"]
         df = df.reset_index()
 
         y_min = df[["Cash", "Value"]].min().min()
         y_max = df[["Cash", "Value"]].max().max()
 
         df = df.sort_values('Datetime')
-        fig_cash_value = px.line(df, x=df["Datetime"], y=df["Value"].values, )
-        fig_cash_value.data[0].line.color = "yellow"
-        fig.add_trace(fig_cash_value.data[0], row=3, col=1)
-
-        fig.update_layout(yaxis3=dict(range=[y_min, y_max]))
+        fig = px.line(df, x=df["Datetime"], y=df["Value"].values, )
+        fig.data[0].line.color = "green"
 
         return fig
 
 
-    def create_main_plot(self):
-        dfs = self.get_plot_data()
+    def create_test_plot(self):
 
-        fig = make_subplots(
-            rows=3, cols=1, row_heights=[3, 0.75, 0.75], shared_xaxes=True, vertical_spacing=0.02
-        )
+        # fig = self.ohlc( )
+        # fig = self.trade_list( )
+        # fig = self.order_history()
+        # fig = self.volume()
+        fig = self.cash_value()
 
-        # Top Figure
-        fig = self.ohlc_data(fig, dfs["ohlcv"])
-        fig = self.trade_list(fig, dfs["trade_list"])
-        fig = self.order_history(fig, dfs["order_history"])
-
-
-        # Bottom Figures
-        fig = self.volume(fig, dfs["ohlcv"])
-        fig = self.cash_value(fig, dfs["value"])
-
-        fig.update_layout(self.set_layout())
-
-        return fig
-
+        # return fig
+        return fig.update_layout(self.set_layout())
 
 if __name__ == "__main__":
     # test_number = "028b707d-e7c0-4831-aeb3-16c679b66a51"
@@ -332,5 +329,5 @@ if __name__ == "__main__":
     # print(f"You have supplied key {test_number}")
 
     btplot = backtest_plot("a191d5534a")
-    plotly.offline.plot(btplot.create_main_plot())
+    plotly.offline.plot(btplot.create_test_plot())
 

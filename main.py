@@ -19,6 +19,7 @@ import datetime
 from datetime import datetime, timedelta
 import inspect
 import itertools
+import json
 import multiprocessing
 import os
 import sys
@@ -26,6 +27,7 @@ import time
 import uuid
 
 import backtrader as bt
+from ccxtbt import CCXTStore
 from tabulate import tabulate
 
 import extension.indicator as id
@@ -69,6 +71,9 @@ class RunBacktest:
 
       - ``reset_database`` (bool: default ``False``)
           If using a database, clear the database.
+
+      - ``broker`` (string: default: ``backbroker``)
+          Set the broker. Acceptable values: `backbroker`, `ib`, `ccxt`
 
       Following are the params values contained in the params dictionary:
       - ``batchname`` (str: default ``None``)
@@ -167,6 +172,9 @@ class RunBacktest:
       - ``ploton`` (bool: default ``False``)
           Print the backtrader plot.
 
+      - ``dashboard`` (bool: default ``False``)
+          If live trading, save data to dash.db and make available for dashboard.
+
     Custom params:
     Params that were used for this specific test and indicators. One can add
     conditions in the ``scenario`` method to ensure certain conditions are met
@@ -192,6 +200,7 @@ class RunBacktest:
         run_test_now=True,
         multi_pro=False,
         reset_database=False,
+        broker='backbroker',
     ):
 
         # GENERAL BACKTEST SETTINGS
@@ -199,6 +208,7 @@ class RunBacktest:
         self.run_test_now = run_test_now
         self.multi_pro = multi_pro
         self.reset_database = reset_database
+        self.broker = broker
 
         self.params = dict(
             batchname=["None", True],
@@ -229,11 +239,13 @@ class RunBacktest:
             print_ohlcv=[-1, False],
             print_final_output=[False, False],
             ploton=[False, False],
+            dashboard=[False, False],
             sma_fast=[20, True],
             sma_slow=[100, True],
             limit_price=[0.08, True],
             stop_price=[0.04, True],
             trade_size=[1.0, True],
+            broker=[self.broker, True],
         )
 
         # Create and modify the parameters values dictionary
@@ -290,7 +302,7 @@ class RunBacktest:
         # Call a reset function from utilities.
         if self.reset_database:
             if yes_or_no("Do you wish to reset the database?"):
-                clear_database()
+                clear_database(db=('backtest' if self.broker == 'backbroker' else 'live'))
             else:
                 pass
 
@@ -483,34 +495,113 @@ class RunBacktest:
         else:
             pass
 
-        # Get data from yahoo.
-        for ticker in [scene["instrument"], scene["benchmark"]]:
-            if ticker:
-                data = bt.feeds.YahooFinanceData(
-                    dataname=ticker,
-                    timeframe=bt.TimeFrame.Days,
-                    fromdate=datetime.strptime(scene["from_date"], "%Y-%m-%d"),
-                    todate=datetime.strptime(scene["to_date"], "%Y-%m-%d"),
-                    reverse=False,
+        if self.broker == 'backbroker':
+            # Get data from yahoo.
+            for ticker in [scene["instrument"], scene["benchmark"]]:
+                if ticker:
+                    data = bt.feeds.YahooFinanceData(
+                        dataname=ticker,
+                        timeframe=bt.TimeFrame.Days,
+                        fromdate=datetime.strptime(scene["from_date"], "%Y-%m-%d"),
+                        todate=datetime.strptime(scene["to_date"], "%Y-%m-%d"),
+                        reverse=False,
+                    )
+
+                    cerebro.adddata(data)
+            # Cash
+            cerebro.broker.setcash(scene["initinvestment"])
+            cerebro.broker.setcommission(
+                commission=scene["commission"], margin=scene["margin"], mult=scene["mult"]
                 )
 
-                cerebro.adddata(data)
+        elif self.broker == "ib":
+            cerebro = bt.Cerebro(live=True)
+            store = bt.stores.IBStore(host="127.0.0.1", port=7497, clientId=888)
+            cerebro.setbroker(store.getbroker())
+            data = store.getdata(
+                dataname='EUR.USD-CASH-IDEALPRO', historical=False, backfill=True,
+                backfill_start=True
+            )
+            # cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes, compression=1,)
+            cerebro.adddata(data)
+        elif self.broker == 'ccxt':
+            # Binance
+            with open("./params.json", "r") as f:
+                params = json.load(f)
+
+            cerebro = bt.Cerebro(quicknotify=True)
+
+
+
+            #
+            # # Create our actual binance store
+            # config = {
+            #           "apiKey": params["binance_actual"]["apikey"],
+            #           "secret": params["binance_actual"]["secret"],
+            #           "enableRateLimit": True,
+            #           }
+
+            # Create our binance/testnet store
+            config = {'urls': {'api': 'https://testnet.binance.vision/api'},
+                      "apiKey": params["binance_testnet"]["apikey"],
+                      "secret": params["binance_testnet"]["secret"],
+                      "enableRateLimit": True,
+                      }
+
+            # IMPORTANT NOTE - Kraken (and some other exchanges) will not return any values
+            # for get cash or value if You have never held any BNB coins in your account.
+            # So switch BNB to a coin you have funded previously if you get errors
+            store = CCXTStore(
+                exchange="binance", currency="USDT", config=config, retries=5, debug=False,
+                sandbox=True
+            )
+
+            # Get the broker and pass any kwargs if needed.
+            # ----------------------------------------------
+            # Broker mappings have been added since some exchanges expect different values
+            # to the defaults. Case in point, Kraken vs Bitmex. NOTE: Broker mappings are not
+            # required if the broker uses the same values as the defaults in CCXTBroker.
+            broker_mapping = {
+                "order_types": {
+                    bt.Order.Market: "market",
+                    bt.Order.Limit: "limit",
+                    bt.Order.Stop: "stop-loss",  # stop-loss for kraken, stop for bitmex
+                    bt.Order.StopLimit: "stop limit",
+                },
+                "mappings": {
+                    "closed_order": {"key": "status", "value": "closed"},
+                    "canceled_order": {"key": "result", "value": 1},
+                },
+            }
+
+            broker = store.getbroker(broker_mapping=broker_mapping)
+            cerebro.setbroker(broker)
+
+            # Get our data
+            # Drop newest will prevent us from loading partial data from incomplete candles
+            hist_start_date = datetime.utcnow() - timedelta(minutes=30)
+
+            data = store.getdata(
+                dataname="BNB/USDT",
+                name="BNBUSDT",
+                timeframe=bt.TimeFrame.Minutes,
+                fromdate=hist_start_date,
+                # todate=datetime(2021, 7, 15),
+                compression=1,
+                ohlcv_limit=500,
+                drop_newest=True,
+                historical=False,
+            )
+
+            # Add the feed
+            cerebro.adddata(data)
 
         # Strategy
         cerebro.addstrategy(Strategy, **scene)
 
-        # Broker
-        cerebro.broker = bt.brokers.BackBroker()
-
-
         # Sizer
         cerebro.addsizer(Stake)
 
-        # Cash
-        cerebro.broker.setcash(scene["initinvestment"])
-        cerebro.broker.setcommission(
-            commission=scene["commission"], margin=scene["margin"], mult=scene["mult"]
-        )
 
         # Analyzers
         cerebro = AddAnalyzer(cerebro).add_analyzers()

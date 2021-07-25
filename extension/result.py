@@ -159,7 +159,7 @@ def transactions(
             li.append(rec)
         df = pd.DataFrame(li, columns=columns_df)
         df = add_key_to_df(df, test_number)
-        agg_dict["transaction"] = df
+        agg_dict["transactions"] = df
 
     if scene["save_excel"]:
         columns = ["Date", "Units", "Price", "SID", "Ticker", "Value"]
