@@ -14,7 +14,7 @@
 #
 ###############################################################################
 import backtrader as bt
-from utils import create_db_connection, write_row
+from utils import write_row
 
 
 class GlobalOutput(bt.analyzers.Analyzer):
@@ -150,6 +150,9 @@ class OrderHistory(bt.analyzers.Analyzer):
         st = self.strategy
         dt = self.data.datetime.datetime()
 
+        if not hasattr(st.broker, 'orders'):
+            return
+
         if len(st.broker.orders) == 0:
             return
 
@@ -197,9 +200,14 @@ class CashMarket(bt.analyzers.Analyzer):
     def notify_cashvalue(self, cash, value):
         date = self.data.datetime.date()
         if date != self.current_date:
+
             self.vals = (cash, value)
             self.rets[self.strategy.datetime.datetime()] = self.vals
             self.current_date = date
+            row = (0, self.strategy.datetime.datetime(), cash, value)
+            if self.strategy.p.dashboard and self.strategy.p.broker != "backbroker":
+                write_row("value", row)
+
         else:
             pass
 
@@ -279,9 +287,8 @@ class OHLCV(bt.analyzers.Analyzer):
             pass
 
         if self.strategy.p.dashboard and self.strategy.p.broker != "backbroker":
-            conn = create_db_connection(db='live')
-            write_row(conn, "ohlcv", row)
-            conn.close()
+            write_row("ohlcv", row)
+
 
     def get_analysis(self):
         return self.rets

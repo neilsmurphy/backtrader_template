@@ -103,9 +103,14 @@ def all_tables(conn):
     cursor.close()
     return tables
 
-def write_row(conn, table, row):
-    sql = f"INSERT INTO {table}(test_number, Date, Open, High, Low, Close, Volume)" \
-          f"VALUES (?, ?, ?, ?, ?, ?, ?) "
+def write_row(table, row, row_names=None):
+    conn = create_db_connection(db='live')
     cur = conn.cursor()
+    rowcursor = conn.execute(f'select * from {table}')
+    names = list(map(lambda x: x[0], rowcursor.description))
+
+    sql = f"INSERT INTO {table}({', '.join(names)}) VALUES ({('?, ' * len(row))[:-2]}) "
+
     cur.execute(sql, row)
     conn.commit()
+    conn.close()

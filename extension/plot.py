@@ -47,22 +47,22 @@ class backtest_plot:
 
     def get_start_plot_date(self):
         with self.get_connection() as conn:
-            sql = f"SELECT * FROM order_history WHERE test_number='{self.test_number}';"
+            sql = f"SELECT * FROM ohlcv WHERE test_number='{self.test_number}';"
             df = pd.read_sql(sql, con=conn)
-        return df["Datetime"].min()
+        return df["Date"].min()
 
     def get_plot_data(self):
         # Get all of the data required for a backtest plot.
         table_names = [
-            "order_history",
+            # "order_history",
             "ohlcv",
-            "global_out",
-            "drawdown",
-            "trade",
-            "trade_analysis",
-            "trade_list",
+            # "global_out",
+            # "drawdown",
+            # "trade",
+            # "trade_analysis",
+            # "trade_list",
             # "transaction",
-            "value",
+            # "value",
             # todo add quantstats?
         ]
 
@@ -242,52 +242,52 @@ class backtest_plot:
 
         return fig
 
-    def order_history(self, df=None):
-        if df is None:
-            df = self.dfs["order_history"]
-        df = df.set_index("Datetime")
-        df.index = pd.to_datetime(df.index)
-        df = df.sort_index()
-        df = df.reset_index()
-
-        fig_order = px.scatter(
-            df,
-            x="Datetime",
-            y="price",
-            color="ordtype",
-            hover_data=[
-                "ref",
-                "status",
-                "size",
-                "ordtype",
-                "price",
-                # "kind",
-                # "life_cycle",
-                # "type_order",
-                # "bar_created",
-                # "high",
-                # "low",
-            ],
-            category_orders={"ordtype": ["Buy", "Sell"]},
-        )
-
-        long_color = "#a85f42"
-        short_color = "#1d6f8c"
-
-        fig_order.data[0].marker.symbol = 22
-        fig_order.data[0].marker.size = 8
-        fig_order.data[0].marker.color = long_color
-        fig_order.data[0].marker.opacity = 0.75
-
-        fig_order.data[1].marker.symbol = 22
-        fig_order.data[1].marker.size = 8
-        fig_order.data[1].marker.color = short_color
-        fig_order.data[1].marker.opacity = 0.75
-
-        # fig.append_trace(fig_order.data[0], row=1, col=1)
-        # fig.append_trace(fig_order.data[1], row=1, col=1)
-
-        return fig_order
+    # def order_history(self, df=None):
+    #     if df is None:
+    #         df = self.dfs["order_history"]
+    #     df = df.set_index("Datetime")
+    #     df.index = pd.to_datetime(df.index)
+    #     df = df.sort_index()
+    #     df = df.reset_index()
+    #
+    #     fig_order = px.scatter(
+    #         df,
+    #         x="Datetime",
+    #         y="price",
+    #         color="ordtype",
+    #         hover_data=[
+    #             "ref",
+    #             "status",
+    #             "size",
+    #             "ordtype",
+    #             "price",
+    #             # "kind",
+    #             # "life_cycle",
+    #             # "type_order",
+    #             # "bar_created",
+    #             # "high",
+    #             # "low",
+    #         ],
+    #         category_orders={"ordtype": ["Buy", "Sell"]},
+    #     )
+    #
+    #     long_color = "#a85f42"
+    #     short_color = "#1d6f8c"
+    #
+    #     fig_order.data[0].marker.symbol = 22
+    #     fig_order.data[0].marker.size = 8
+    #     fig_order.data[0].marker.color = long_color
+    #     fig_order.data[0].marker.opacity = 0.75
+    #
+    #     fig_order.data[1].marker.symbol = 22
+    #     fig_order.data[1].marker.size = 8
+    #     fig_order.data[1].marker.color = short_color
+    #     fig_order.data[1].marker.opacity = 0.75
+    #
+    #     # fig.append_trace(fig_order.data[0], row=1, col=1)
+    #     # fig.append_trace(fig_order.data[1], row=1, col=1)
+    #
+    #     return fig_order
 
     def volume(self, df=None):
         if df is None:
@@ -314,11 +314,11 @@ class backtest_plot:
 
     def create_test_plot(self):
 
-        # fig = self.ohlc( )
+        fig = self.ohlc()
         # fig = self.trade_list( )
-        # fig = self.order_history()
+        ### fig = self.order_history()
         # fig = self.volume()
-        fig = self.cash_value()
+        # fig = self.cash_value()
 
         # return fig
         return fig.update_layout(self.set_layout())
@@ -328,6 +328,6 @@ if __name__ == "__main__":
     # test_number = input("Please input the key for the backtest you wish to see. \n--->  ")
     # print(f"You have supplied key {test_number}")
 
-    btplot = backtest_plot("a191d5534a")
+    btplot = backtest_plot(0)
     plotly.offline.plot(btplot.create_test_plot())
 

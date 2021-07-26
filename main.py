@@ -660,6 +660,7 @@ class Strategy(StandardStrategy):
         self.long_buy_signal = self.sma_cross.long_buy_signal
         self.short_sell_signal = self.sma_cross.short_sell_signal
 
+
     def next(self):
         # Printouts for dev. To become logging.
         if self.p.print_dev:
@@ -687,7 +688,7 @@ class Strategy(StandardStrategy):
         if self.long_buy_signal and self.getposition().size <= 0:
             limit_price = self.datas[0].close[0] * (1 + self.p.limit_price)
             stop_price = self.datas[0].close[0] * (1 - self.p.stop_price)
-            size = (self.broker.get_value() * 0.9) / self.datas[0].close[0]
+            size = (self.broker.getvalue() * 0.9) / self.datas[0].close[0]
 
             order = self.buy_bracket(
                 size=size,
