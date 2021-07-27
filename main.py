@@ -519,11 +519,11 @@ class RunBacktest:
             store = bt.stores.IBStore(host="127.0.0.1", port=7497, clientId=888)
             cerebro.setbroker(store.getbroker())
             data = store.getdata(
-                dataname='EUR.USD-CASH-IDEALPRO', historical=False, backfill=True,
+                dataname='FB', historical=False, backfill=True,
                 backfill_start=True
             )
-            # cerebro.resampledata(data, timeframe=bt.TimeFrame.Minutes, compression=1,)
-            cerebro.adddata(data)
+            cerebro.resampledata(data, timeframe=bt.TimeFrame.Seconds, compression=10,)
+            # cerebro.adddata(data)
         elif self.broker == 'ccxt':
             # Binance
             with open("./params.json", "r") as f:
@@ -659,6 +659,7 @@ class Strategy(StandardStrategy):
 
         self.long_buy_signal = self.sma_cross.long_buy_signal
         self.short_sell_signal = self.sma_cross.short_sell_signal
+        self.traded = False
 
 
     def next(self):
@@ -685,18 +686,24 @@ class Strategy(StandardStrategy):
         if self.ord:
             return
 
-        if self.long_buy_signal and self.getposition().size <= 0:
-            limit_price = self.datas[0].close[0] * (1 + self.p.limit_price)
-            stop_price = self.datas[0].close[0] * (1 - self.p.stop_price)
-            size = (self.broker.getvalue() * 0.9) / self.datas[0].close[0]
+        if self.live_data and not self.traded:
+            # limit_price = self.datas[0].close[0] * (1 + self.p.limit_price)
+            # stop_price = self.datas[0].close[0] * (1 - self.p.stop_price)
+            # size = (self.broker.getvalue() * 0.9) / self.datas[0].close[0]
+            #
+            # order = self.buy_bracket(
+            #     size=size,
+            #     exectype=bt.Order.Market,
+            #     stopprice=stop_price,
+            #     stopexec=bt.Order.Stop,
+            #     limitprice=limit_price,
+            #     limitexec=bt.Order.Limit,
+            # )
+            #
+            # self.ord = [o for o in order]
+            self.buy(size=10)
+            self.traded = True
+        elif self.live_data and self.getposition().size > 0:
+            self.close()
+            self.traded = False
 
-            order = self.buy_bracket(
-                size=size,
-                exectype=bt.Order.Market,
-                stopprice=stop_price,
-                stopexec=bt.Order.Stop,
-                limitprice=limit_price,
-                limitexec=bt.Order.Limit,
-            )
-
-            self.ord = [o for o in order]

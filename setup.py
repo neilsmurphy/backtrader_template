@@ -23,7 +23,7 @@ print_params = True
 run_test_now = True
 multi_pro = False
 reset_database = True
-broker = 'ccxt'  # `backbroker`, `ib`, `ccxt`
+broker = 'ib'  # `backbroker`, `ib`, `ccxt`
 
 # BACKTEST PARAMETERS
 pvalues = dict(

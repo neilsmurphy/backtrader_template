@@ -19,18 +19,23 @@ import math
 from pathlib import Path
 import sqlite3
 
+
 def time_str_to_datetime(time):
     return datetime.strptime(time, "%H:%M").time()
+
 
 def round_down(x):
     return math.trunc(x * 4) / 4
 
+
 def round_up(x):
     return math.ceil(x * 4) / 4
+
 
 def time_tuple(d):
     keys, values = zip(*d.items())
     return [tuple(dict(zip(keys, v)).items()) for v in itertools.product(*values)]
+
 
 def yes_or_no(question):
     """ Simple yes no choice function. """
@@ -42,7 +47,9 @@ def yes_or_no(question):
     else:
         return yes_or_no("Please enter y/n")
 
+
 """ Database Utilities """
+
 
 def create_db_connection(db=None):
     """
@@ -64,6 +71,7 @@ def create_db_connection(db=None):
     filepath = root / dir / filename
     return sqlite3.connect(filepath, uri=False)
 
+
 def df_to_db(agg_dict):
     """ Saves results dataframes to the sqlite3 database"""
     engine = create_db_connection(db="backtest")
@@ -72,45 +80,57 @@ def df_to_db(agg_dict):
         try:
             # Remove whitespace before going to sql.
             df.columns = [name.replace(" ", "_") for name in df.columns]
-            df.to_sql(
-                table_name, con=engine, if_exists="append", index=False
-            )
+            df.to_sql(table_name, con=engine, if_exists="append", index=False)
         except Exception as e:
             print(f"{e} {table_name} failed.")
     engine.close()
+
 
 def clear_database(db=None):
     conn = create_db_connection(db=db)
     clear_tables(conn)
 
+
 def clear_tables(conn):
     tables = all_tables(conn)
     # cursor = conn.cursor()
     for table in tables:
-        sql = f'DELETE FROM {table};'
-        conn.execute(sql);
+        sql = f"DELETE FROM {table};"
+        conn.execute(sql)
 
     conn.commit()
     # cursor.close()
     conn.close()
 
+
 def all_tables(conn):
     cursor = conn.execute(f"SELECT name FROM sqlite_master WHERE type='table';")
-    tables = [
-        v[0] for v in cursor.fetchall()
-        if v[0] != "sqlite_sequence"
-    ]
+    tables = [v[0] for v in cursor.fetchall() if v[0] != "sqlite_sequence"]
     cursor.close()
     return tables
 
-def write_row(table, row, row_names=None):
-    conn = create_db_connection(db='live')
+
+def create_table(table, conn):
+    # For live databases only, the backtesting database just recreates the entire db.
+    table_sqls = dict(
+        next="Date TEXT, Cash REAL, Value REAL, Open REAL, High REAL, Low REAL, Close REAL, "
+        "Volume REAL",
+        trade="Trade_Ref REAL, Date TEXT, Symbol REAL, Dir REAL, PNL REAL, "
+        "PNL_less_comm REAL, COMM REAL, duration REAL, pricein REAL, "
+        "priceout REAL, datein REAL, dateout REAL, pcntchange REAL, pnl_hist REAL",
+    )
+    sql_create = f"CREATE TABLE IF NOT EXISTS {table} ({table_sqls[table]})"
+    conn.execute(sql_create)
+
+
+def write_row(table, row, row_names):
+    conn = create_db_connection(db="live")
     cur = conn.cursor()
-    rowcursor = conn.execute(f'select * from {table}')
-    names = list(map(lambda x: x[0], rowcursor.description))
 
-    sql = f"INSERT INTO {table}({', '.join(names)}) VALUES ({('?, ' * len(row))[:-2]}) "
+    create_table(table, conn)
 
+    sql = f"INSERT INTO {table}({', '.join(row_names)}) VALUES ({('?, ' * len(row))[:-2]}) "
     cur.execute(sql, row)
+
     conn.commit()
     conn.close()

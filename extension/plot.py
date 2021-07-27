@@ -36,18 +36,16 @@ class backtest_plot:
 
 
     """
-    def __init__(self, test_number):
-        self.test_number = test_number
+    def __init__(self):
         self.start_plot_date = self.get_start_plot_date()
         self.dfs = self.get_plot_data()
-        x=1
 
     def get_connection(self):
         return create_db_connection(db="live")
 
     def get_start_plot_date(self):
         with self.get_connection() as conn:
-            sql = f"SELECT * FROM ohlcv WHERE test_number='{self.test_number}';"
+            sql = f"SELECT * FROM next;"
             df = pd.read_sql(sql, con=conn)
         return df["Date"].min()
 
@@ -55,7 +53,7 @@ class backtest_plot:
         # Get all of the data required for a backtest plot.
         table_names = [
             # "order_history",
-            "ohlcv",
+            "next",
             # "global_out",
             # "drawdown",
             # "trade",
@@ -70,7 +68,7 @@ class backtest_plot:
         for table_name in table_names:
             with self.get_connection() as conn:
                 try:
-                    sql = f"SELECT * FROM {table_name} WHERE test_number='{self.test_number}';"
+                    sql = f"SELECT * FROM {table_name};"
                     df = pd.read_sql(sql, con=conn)
                 except:
                     raise ValueError(
@@ -80,7 +78,7 @@ class backtest_plot:
                 df.rename(columns={'Date': 'Datetime'}, inplace=True)
 
             # Format date fields.
-            if table_name in ["ohlcv", "value"]:
+            if table_name in ["next", "ohlcv", "value"]:
                 df = df.set_index("Datetime")
                 df.index = pd.to_datetime(df.index)
                 df = df.sort_index()
@@ -108,7 +106,7 @@ class backtest_plot:
         # Set layout
         layout = dict(
             title=dict(
-                text=f"{self.test_number}",
+                text=f"Dashboard",
                 font=dict(family="Oveerpass", size=18,),  # color="firebrick"),
             ),
             xaxis=(dict(type="category", rangeslider=dict(visible=False), showgrid=False)),
@@ -143,7 +141,7 @@ class backtest_plot:
     def ohlc(self, df=None):
         """ Plot data for OHLC """
         if df is None:
-            df = self.dfs["ohlcv"]
+            df = self.dfs["next"]
         df = df.reset_index()
         fig = go.Figure(
             data=[
@@ -324,10 +322,6 @@ class backtest_plot:
         return fig.update_layout(self.set_layout())
 
 if __name__ == "__main__":
-    # test_number = "028b707d-e7c0-4831-aeb3-16c679b66a51"
-    # test_number = input("Please input the key for the backtest you wish to see. \n--->  ")
-    # print(f"You have supplied key {test_number}")
-
-    btplot = backtest_plot(0)
+    btplot = backtest_plot()
     plotly.offline.plot(btplot.create_test_plot())
 

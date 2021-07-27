@@ -150,7 +150,7 @@ class OrderHistory(bt.analyzers.Analyzer):
         st = self.strategy
         dt = self.data.datetime.datetime()
 
-        if not hasattr(st.broker, 'orders'):
+        if not hasattr(st.broker, "orders"):
             return
 
         if len(st.broker.orders) == 0:
@@ -204,9 +204,14 @@ class CashMarket(bt.analyzers.Analyzer):
             self.vals = (cash, value)
             self.rets[self.strategy.datetime.datetime()] = self.vals
             self.current_date = date
-            row = (0, self.strategy.datetime.datetime(), cash, value)
+            row = (self.strategy.datetime.datetime(), cash, value)
+            row_names = (
+                "Date",
+                "Cash",
+                "Value",
+            )
             if self.strategy.p.dashboard and self.strategy.p.broker != "backbroker":
-                write_row("value", row)
+                write_row("value", row, row_names)
 
         else:
             pass
@@ -273,7 +278,6 @@ class OHLCV(bt.analyzers.Analyzer):
         # Create custom volume for plotting higher volumes in bright yellow,
         # grey out lower volume.
         row = [
-            0,
             self.datas[0].datetime.datetime(),
             self.datas[0].open[0],
             self.datas[0].high[0],
@@ -282,13 +286,9 @@ class OHLCV(bt.analyzers.Analyzer):
             self.datas[0].volume[0],
         ]
         try:
-            self.rets[row[1]] = row[2:]
+            self.rets[row[0]] = row[1:]
         except:
             pass
-
-        if self.strategy.p.dashboard and self.strategy.p.broker != "backbroker":
-            write_row("ohlcv", row)
-
 
     def get_analysis(self):
         return self.rets
@@ -319,6 +319,65 @@ class Benchmark(bt.analyzers.Analyzer):
         return self.rets
 
 
+class Live(bt.analyzers.Analyzer):
+    """ This analyzer sends data to the database for plotting. """
+
+    def start(self):
+        self.rets = {}
+
+    def notify_trade(self, trade):
+        """Receives trade notifications before each next cycle"""
+        trade_row = dict()
+        dir = "short"
+        if trade.history[0].event.size > 0:
+            dir = "long"
+        pricein = trade.history[len(trade.history) - 1].status.price
+        priceout = trade.history[len(trade.history) - 1].event.price
+
+        if trade.isclosed:
+            trade_row = dict(
+                Trade_Ref=trade.ref,
+                Date=self.strategy.datetime.datetime(),
+                Symbol=trade.data._name,
+                Dir=dir,
+                PNL=round(trade.pnl, 2),
+                PNL_less_comm=round(trade.pnlcomm, 2),
+                COMM=trade.commission,
+                duration=(trade.dtclose - trade.dtopen),
+                pricein=pricein,
+                priceout=priceout,
+                datein=bt.num2date(trade.history[0].status.dt),
+                dateout=bt.num2date(trade.history[len(trade.history) - 1].status.dt),
+                pcntchange=100 * priceout / pricein - 100,
+                pnl_hist=trade.history[len(trade.history) - 1].status.pnlcomm,
+            )
+
+            if len(trade_row) > 0:
+                write_row("trade", list(trade_row.values()), trade_row.keys())
+
+    def next(self):
+        next_row = dict()
+        try:
+            next_row = dict(
+                Date=self.datas[0].datetime.datetime(),
+                Cash=0, # self.strategy.getcash(),
+                Value=0, # self.strategy.getvalue(),
+                Open=self.datas[0].open[0],
+                High=self.datas[0].high[0],
+                Low=self.datas[0].low[0],
+                Close=self.datas[0].close[0],
+                Volume=self.datas[0].volume[0],
+            )
+        except:
+            pass
+
+        if len(next_row) > 0:
+            write_row("next", list(next_row.values()), next_row.keys())
+
+    def get_analysis(self):
+        return self.rets
+
+
 class AddAnalyzer:
     """
     Adds the analyzers to cerebro and returns cerebro to the ``run_strat``.
@@ -332,6 +391,9 @@ class AddAnalyzer:
         # Analyzers returned in the strategy object
         scene = self.cerebro.strats[0][0][2]
 
+        if scene["dashboard"] and scene["broker"] != "backbroker":
+            self.cerebro.addanalyzer(Live, _name="live_data")
+            return self.cerebro
         # For all tests, but mainly high volume multi-processor tests.
         self.cerebro.addanalyzer(bt.analyzers.TradeAnalyzer, _name="trades")
         self.cerebro.addanalyzer(bt.analyzers.DrawDown, _name="drawdown")
